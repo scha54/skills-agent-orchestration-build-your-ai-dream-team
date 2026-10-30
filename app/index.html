@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A clear overview of project status, ownership, activity, and priority.">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard" id="dashboard" aria-busy="true">
+      <header class="dashboard-header">
+        <h1>Project Pulse</h1>
+        <p>A quick look at project progress, recent activity, and what needs attention.</p>
+      </header>
+
+      <p class="empty-state" id="feedback" role="status" aria-live="polite">Loading projects…</p>
+      <section id="project-list" aria-label="Projects"></section>
+    </main>
+
+    <script>
+      const dashboard = document.querySelector("#dashboard");
+      const feedback = document.querySelector("#feedback");
+      const projectList = document.querySelector("#project-list");
+
+      function displayValue(value, fallback) {
+        if (typeof value === "string" && value.trim()) {
+          return value.trim();
+        }
+        if (typeof value === "number" && Number.isFinite(value)) {
+          return String(value);
+        }
+        return fallback;
+      }
+
+      function makeTextElement(tagName, className, text) {
+        const element = document.createElement(tagName);
+        element.className = className;
+        element.textContent = text;
+        return element;
+      }
+
+      function makeDetail(label, value, badgeClass, dataAttribute) {
+        const row = document.createElement("p");
+        const badge = document.createElement("span");
+
+        badge.className = badgeClass;
+        badge.textContent = value;
+        badge.setAttribute("aria-label", `${label}: ${value}`);
+
+        if (dataAttribute) {
+          const normalizedValue = value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+          badge.setAttribute(dataAttribute, normalizedValue);
+        }
+
+        if (badgeClass !== "priority-badge") {
+          const labelElement = document.createElement("strong");
+          labelElement.textContent = `${label}: `;
+          row.append(labelElement);
+        }
+        row.append(badge);
+        if (badgeClass === "priority-badge") {
+          row.setAttribute("aria-label", `${label}: ${value}`);
+        }
+        return row;
+      }
+
+      function createProjectCard(project) {
+        const card = document.createElement("article");
+        card.className = "project-card";
+
+        const name = displayValue(project.name, "Untitled project");
+        const owner = displayValue(project.owner, "Owner not provided");
+        const status = displayValue(project.status, "Status not provided");
+        const recentActivity = displayValue(project.recentActivity, "No recent activity provided.");
+        const priority = displayValue(project.priority, "Priority not provided");
+        const summary = displayValue(project.summary, "No summary provided.");
+
+        card.append(makeTextElement("h2", "project-name", name));
+        card.append(makeTextElement("p", "summary", summary));
+
+        const details = document.createElement("div");
+        details.append(
+          makeDetail("Owner", owner, "owner"),
+          makeDetail("Status", status, "status-badge", "data-status"),
+          makeDetail("Recent activity", recentActivity, "recent-activity"),
+          makeDetail("Priority", priority, "priority-badge", "data-priority")
+        );
+        card.append(details);
+        return card;
+      }
+
+      async function loadProjects() {
+        try {
+          const response = await fetch("project-data.json");
+          if (!response.ok) {
+            throw new Error(`The request returned HTTP ${response.status}.`);
+          }
+
+          let data;
+          try {
+            data = await response.json();
+          } catch {
+            throw new Error("The project data file is not valid JSON.");
+          }
+
+          if (!data || typeof data !== "object" || !Array.isArray(data.projects)) {
+            throw new Error('The project data must contain a "projects" array.');
+          }
+
+          if (data.projects.some((project) => !project || typeof project !== "object" || Array.isArray(project))) {
+            throw new Error("One or more project entries are invalid.");
+          }
+
+          if (data.projects.length === 0) {
+            feedback.className = "empty-state";
+            feedback.textContent = "There are no projects to show yet. Check back soon.";
+            dashboard.setAttribute("aria-busy", "false");
+            return;
+          }
+
+          const cards = document.createDocumentFragment();
+          data.projects.forEach((project) => cards.append(createProjectCard(project)));
+          projectList.append(cards);
+          feedback.hidden = true;
+          dashboard.setAttribute("aria-busy", "false");
+        } catch (error) {
+          feedback.className = "error-message";
+          feedback.setAttribute("role", "alert");
+          feedback.textContent = `Unable to load project data. ${error.message} Make sure the dashboard is served from the app folder, then refresh the page.`;
+          dashboard.setAttribute("aria-busy", "false");
+        }
+      }
+
+      loadProjects();
+    </script>
+  </body>
+</html>

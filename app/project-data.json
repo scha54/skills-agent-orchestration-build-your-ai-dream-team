@@ -1,0 +1,44 @@
+{
+  "projects": [
+    {
+      "name": "Customer Portal Refresh",
+      "owner": "Maya Chen",
+      "status": "On track",
+      "recentActivity": "Completed the account settings usability review",
+      "priority": "High",
+      "summary": "Modernize account management and reduce support requests."
+    },
+    {
+      "name": "Mobile Checkout",
+      "owner": "Jordan Lee",
+      "status": "At risk",
+      "recentActivity": "Payment provider testing uncovered a retry-flow issue",
+      "priority": "High",
+      "summary": "Make mobile purchases faster and more reliable."
+    },
+    {
+      "name": "Analytics Workspace",
+      "owner": "Avery Patel",
+      "status": "In progress",
+      "recentActivity": "Finished the first draft of the adoption dashboard",
+      "priority": "Medium",
+      "summary": "Give teams a shared view of product usage and trends."
+    },
+    {
+      "name": "Documentation Hub",
+      "owner": "Riley Morgan",
+      "status": "On track",
+      "recentActivity": "Published updated onboarding guides for new users",
+      "priority": "Low",
+      "summary": "Make product guidance easier to find and maintain."
+    },
+    {
+      "name": "Platform Reliability",
+      "owner": "Sam Rivera",
+      "status": "Planning",
+      "recentActivity": "Prioritized the next quarter's reliability improvements",
+      "priority": "Medium",
+      "summary": "Reduce service interruptions and improve incident response."
+    }
+  ]
+}
